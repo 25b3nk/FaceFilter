@@ -1,8 +1,5 @@
 package com.example.facefilter1
 
-//import android.app.Instrumentation.ActivityResult
-import android.graphics.Rect
-import android.media.Image
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,20 +10,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
-//import androidx.compose.ui.tooling.preview.Preview
 import com.example.facefilter1.ui.theme.FaceFilter1Theme
 import android.util.Log
-import android.util.Size
 import androidx.annotation.OptIn
-//import androidx.activity.compose.rememberLauncherForActivityResult
-//import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.core.resolutionselector.AspectRatioStrategy
 import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
@@ -38,15 +30,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.facefilter1.facedetector.FaceDetectionAnalyzer
-//import com.example.facefilter1.facedetector.FaceDetectorProcessor
 import com.example.facefilter1.facedetector.FaceOverlayView
-import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
-import com.google.mlkit.vision.face.FaceContour
-import com.google.mlkit.vision.face.FaceDetection
-import com.google.mlkit.vision.face.FaceDetectorOptions
-import com.google.mlkit.vision.face.FaceLandmark
-import java.util.concurrent.Executors
 
 
 class MainActivity : ComponentActivity() {
@@ -58,8 +43,7 @@ class MainActivity : ComponentActivity() {
             FaceFilter1Theme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
 //                    val launcher = rememberLauncherForActivityResult(
 //                        ActivityResultContracts.RequestPermission()
@@ -77,45 +61,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Composable
-fun CameraPreview() {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
-    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
-
-    AndroidView(
-        factory = { ctx ->
-            val previewView = PreviewView(ctx)
-            val executor = ContextCompat.getMainExecutor(ctx)
-            cameraProviderFuture.addListener({
-                val cameraProvider = cameraProviderFuture.get()
-                val preview = Preview.Builder().build().also {
-                    it.surfaceProvider = previewView.surfaceProvider
-                }
-
-                val cameraSelector = CameraSelector.Builder()
-                    .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
-                    .build()
-
-                try {
-                    cameraProvider.unbindAll()
-                    cameraProvider.bindToLifecycle(
-                        lifecycleOwner,
-                        cameraSelector,
-                        preview
-                    )
-                } catch (exc: Exception) {
-                    Log.e("CameraPreview", "Use case binding failed", exc)
-                }
-            }, executor)
-            previewView
-        },
-        modifier = Modifier.fillMaxSize(),
+        text = "Hello $name!", modifier = modifier
     )
 }
 
@@ -148,15 +94,14 @@ fun CameraPreviewWithAnalysis() {
 
                     val imageAnalyzer = ImageAnalysis.Builder()
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .setResolutionSelector(resolutionSelector)
-                        .build()
-                        .also {
-                            it.setAnalyzer(executor, FaceDetectionAnalyzer { fs, width, height, rotation ->
-                                faces = fs
-                                imageWidth = width
-                                imageHeight = height
-                                imageRotation = rotation
-                            })
+                        .setResolutionSelector(resolutionSelector).build().also {
+                            it.setAnalyzer(executor,
+                                FaceDetectionAnalyzer { fs, width, height, rotation ->
+                                    faces = fs
+                                    imageWidth = width
+                                    imageHeight = height
+                                    imageRotation = rotation
+                                })
                         }
 
                     val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
@@ -164,12 +109,9 @@ fun CameraPreviewWithAnalysis() {
                     try {
                         cameraProvider.unbindAll()
                         cameraProvider.bindToLifecycle(
-                            lifecycleOwner,
-                            cameraSelector,
-                            preview,
-                            imageAnalyzer
+                            lifecycleOwner, cameraSelector, preview, imageAnalyzer
                         )
-                    } catch(exc: Exception) {
+                    } catch (exc: Exception) {
                         Log.e("CameraPreview", "Use case binding failed", exc)
                     }
                 }, executor)
@@ -178,16 +120,13 @@ fun CameraPreviewWithAnalysis() {
             modifier = Modifier.fillMaxSize(),
         )
 
-        AndroidView(
-            factory = { context ->
-                FaceOverlayView(context).apply {
-                    setWillNotDraw(false)
-                }
-            },
-            update = { view ->
-                view.updateFaces(faces, imageWidth, imageHeight, imageRotation)
-            },
-            modifier = Modifier.fillMaxSize()
+        AndroidView(factory = { context ->
+            FaceOverlayView(context).apply {
+                setWillNotDraw(false)
+            }
+        }, update = { view ->
+            view.updateFaces(faces, imageWidth, imageHeight, imageRotation)
+        }, modifier = Modifier.fillMaxSize()
         )
     }
 }
