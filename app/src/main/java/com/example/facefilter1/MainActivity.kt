@@ -41,6 +41,7 @@ import com.example.facefilter1.facedetector.FaceDetectionAnalyzer
 //import com.example.facefilter1.facedetector.FaceDetectorProcessor
 import com.example.facefilter1.facedetector.FaceOverlayView
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceContour
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
@@ -125,7 +126,7 @@ fun CameraPreviewWithAnalysis() {
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
 
-    var faceBounds by remember { mutableStateOf(listOf<Rect>()) }
+    var faces by remember { mutableStateOf(listOf<Face>()) }
     var imageWidth by remember { mutableStateOf(0) }
     var imageHeight by remember { mutableStateOf(0) }
     var imageRotation by remember { mutableStateOf(0) }
@@ -150,8 +151,8 @@ fun CameraPreviewWithAnalysis() {
                         .setResolutionSelector(resolutionSelector)
                         .build()
                         .also {
-                            it.setAnalyzer(executor, FaceDetectionAnalyzer { faces, width, height, rotation ->
-                                faceBounds = faces
+                            it.setAnalyzer(executor, FaceDetectionAnalyzer { fs, width, height, rotation ->
+                                faces = fs
                                 imageWidth = width
                                 imageHeight = height
                                 imageRotation = rotation
@@ -184,7 +185,7 @@ fun CameraPreviewWithAnalysis() {
                 }
             },
             update = { view ->
-                view.updateFaces(faceBounds, imageWidth, imageHeight, imageRotation)
+                view.updateFaces(faces, imageWidth, imageHeight, imageRotation)
             },
             modifier = Modifier.fillMaxSize()
         )

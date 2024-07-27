@@ -9,6 +9,7 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import com.google.mlkit.vision.face.Face
 
 class FaceOverlayView @JvmOverloads constructor(
     context: Context,
@@ -28,13 +29,20 @@ class FaceOverlayView @JvmOverloads constructor(
         strokeWidth = 5f
     }
 
-    private var faceBounds: List<Rect> = listOf()
+    private val TAG = "FaceOverlayView"
+
+    private var faces: List<Face> = listOf()
     private var imageWidth = 0
     private var imageHeight = 0
     private var imageRotation = 0
 
-    fun updateFaces(faces: List<Rect>, imageWidth: Int, imageHeight: Int, rotation: Int) {
-        this.faceBounds = faces
+    fun updateFaces(
+        faces: List<Face>,
+        imageWidth: Int,
+        imageHeight: Int,
+        rotation: Int
+    ) {
+        this.faces = faces
 
         this.imageRotation = rotation
         if (rotation == 0 || rotation == 180) {
@@ -60,8 +68,8 @@ class FaceOverlayView @JvmOverloads constructor(
         super.onDraw(canvas)
 
         if (imageWidth == 0 || imageHeight == 0) return
-        if (faceBounds.isEmpty()) return
-        faceBounds[0].centerX()
+        if (faces.isEmpty()) return
+//        faces[0].centerX()
 
         val scaleX = width.toFloat() / imageWidth
         val scaleY = height.toFloat() / imageHeight
@@ -84,24 +92,29 @@ class FaceOverlayView @JvmOverloads constructor(
             "postScaleHeightOffset: $postScaleHeightOffset postScaleWidthOffset: $postScaleWidthOffset"
         )
 
-
-        for (face in faceBounds) {
-            val x = translateX(face.centerX().toFloat(), scaleFactor, postScaleWidthOffset)
-            val y = translateY(face.centerY().toFloat(), scaleFactor, postScaleHeightOffset)
-            val left = x - scaleX * (face.width() / 2.0f)
-            val top = y - scaleY * (face.height() / 2.0f)
-            val right = x + scaleX * (face.width() / 2.0f)
-            val bottom = y + scaleY * (face.height() / 2.0f)
-            val scaledLeft = face.left * scaleX
-            val scaledTop = face.top * scaleY
-            val scaledRight = face.right * scaleX
-            val scaledBottom = face.bottom * scaleY
-            Log.v("FaceOverlayView", "As per MLkit example: $left $top $right $bottom")
+        for (face in faces) {
+            val faceBound = face.boundingBox
+            val x = translateX(faceBound.centerX().toFloat(), scaleFactor, postScaleWidthOffset)
+            val y = translateY(faceBound.centerY().toFloat(), scaleFactor, postScaleHeightOffset)
+            val left = x - scaleX * (faceBound.width() / 2.0f)
+            val top = y - scaleY * (faceBound.height() / 2.0f)
+            val right = x + scaleX * (faceBound.width() / 2.0f)
+            val bottom = y + scaleY * (faceBound.height() / 2.0f)
+            val scaledLeft = faceBound.left * scaleX
+            val scaledTop = faceBound.top * scaleY
+            val scaledRight = faceBound.right * scaleX
+            val scaledBottom = faceBound.bottom * scaleY
+            Log.v(TAG, "As per MLkit example: $left $top $right $bottom")
             Log.v(
-                "FaceOverlayView",
+                TAG,
                 "As per claude: $scaledLeft $scaledTop $scaledRight $scaledBottom"
             )
-            canvas.drawRect(left, top, right, bottom, boxPaint)
+            if (face.smilingProbability != null) {
+                Log.v(TAG, "smiling probability: ${face.smilingProbability}")
+                if (face.smilingProbability!! > 0.5) {
+                    canvas.drawRect(left, top, right, bottom, boxPaint)
+                }
+            }
         }
     }
 }

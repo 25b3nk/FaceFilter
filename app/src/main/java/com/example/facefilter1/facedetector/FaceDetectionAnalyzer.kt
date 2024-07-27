@@ -7,13 +7,14 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 
-private const val TAG: String = "FaceDetectorProcessor";
+private const val TAG: String = "FaceDetectorProcessor"
 
 class FaceDetectionAnalyzer(
-    private val onFacesDetected: (List<Rect>, Int, Int, Int) -> Unit
+    private val onFacesDetected: (List<Face>, Int, Int, Int) -> Unit
 ) : ImageAnalysis.Analyzer {
     //    private val faceDetector by lazy {
 //        val options = FaceDetectorOptions.Builder()
@@ -26,12 +27,16 @@ class FaceDetectionAnalyzer(
 //        FaceDetection.getClient(options)
 //        Log.v(TAG, "Face detector options: $options")
 //    }
+//    private val options = FaceDetectorOptions.Builder()
+//        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+//        .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+//        .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+//        .enableTracking()
+//        .setMinFaceSize(0.15f)
+//        .build()
     private val options = FaceDetectorOptions.Builder()
-        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-        .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-        .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+        .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
         .enableTracking()
-        .setMinFaceSize(0.15f)
         .build()
     private val faceDetector = FaceDetection.getClient(options)
 
@@ -48,9 +53,17 @@ class FaceDetectionAnalyzer(
             faceDetector.process(inputImage)
                 .addOnSuccessListener { faces ->
                     Log.d("FaceDetector", "Length of faces: ${faces.size}")
-                    Log.d("FaceDetector", "@CSB :: mediaImage.width: ${mediaImage.width} mediaImage.height: ${mediaImage.height}")
+                    Log.d(
+                        "FaceDetector",
+                        "@CSB :: mediaImage.width: ${mediaImage.width} mediaImage.height: ${mediaImage.height}"
+                    )
                     val faceRects = faces.map { it.boundingBox }
-                    onFacesDetected(faceRects, mediaImage.width, mediaImage.height, imageProxy.imageInfo.rotationDegrees)
+                    onFacesDetected(
+                        faces,
+                        mediaImage.width,
+                        mediaImage.height,
+                        imageProxy.imageInfo.rotationDegrees
+                    )
                 }
                 .addOnFailureListener { e ->
                     Log.e("FaceDetector", "error: $e")
