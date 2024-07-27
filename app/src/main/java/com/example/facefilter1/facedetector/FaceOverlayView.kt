@@ -4,17 +4,15 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import com.google.mlkit.vision.face.Face
 
+private const val TAG = "FaceOverlayView"
+
 class FaceOverlayView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
     private val boxPaint = Paint().apply {
@@ -29,7 +27,6 @@ class FaceOverlayView @JvmOverloads constructor(
         strokeWidth = 5f
     }
 
-    private val TAG = "FaceOverlayView"
 
     private var faces: List<Face> = listOf()
     private var imageWidth = 0
@@ -37,10 +34,7 @@ class FaceOverlayView @JvmOverloads constructor(
     private var imageRotation = 0
 
     fun updateFaces(
-        faces: List<Face>,
-        imageWidth: Int,
-        imageHeight: Int,
-        rotation: Int
+        faces: List<Face>, imageWidth: Int, imageHeight: Int, rotation: Int
     ) {
         this.faces = faces
 
@@ -77,7 +71,7 @@ class FaceOverlayView @JvmOverloads constructor(
         val imageAspectRatio = imageWidth.toFloat() / imageHeight
         var postScaleHeightOffset = 0.0f
         var postScaleWidthOffset = 0.0f
-        var scaleFactor = 0.0f
+        val scaleFactor: Float
         if (viewAspectRatio > imageAspectRatio) {
             scaleFactor = width.toFloat() / imageWidth
             postScaleHeightOffset = (width.toFloat() / imageAspectRatio - height) / 2
@@ -104,10 +98,9 @@ class FaceOverlayView @JvmOverloads constructor(
             val scaledTop = faceBound.top * scaleY
             val scaledRight = faceBound.right * scaleX
             val scaledBottom = faceBound.bottom * scaleY
-            Log.v(TAG, "As per MLkit example: $left $top $right $bottom")
+            Log.v(TAG, "As per ML kit example: $left $top $right $bottom")
             Log.v(
-                TAG,
-                "As per claude: $scaledLeft $scaledTop $scaledRight $scaledBottom"
+                TAG, "As per claude: $scaledLeft $scaledTop $scaledRight $scaledBottom"
             )
             if (face.smilingProbability != null) {
                 Log.v(TAG, "smiling probability: ${face.smilingProbability}")

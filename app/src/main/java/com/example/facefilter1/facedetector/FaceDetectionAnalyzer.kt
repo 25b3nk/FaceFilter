@@ -1,6 +1,5 @@
 package com.example.facefilter1.facedetector
 
-import android.graphics.Rect
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
@@ -11,7 +10,7 @@ import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 
-private const val TAG: String = "FaceDetectorProcessor"
+//private const val TAG: String = "FaceDetectorProcessor"
 
 class FaceDetectionAnalyzer(
     private val onFacesDetected: (List<Face>, Int, Int, Int) -> Unit
@@ -57,7 +56,6 @@ class FaceDetectionAnalyzer(
                         "FaceDetector",
                         "@CSB :: mediaImage.width: ${mediaImage.width} mediaImage.height: ${mediaImage.height}"
                     )
-                    val faceRects = faces.map { it.boundingBox }
                     onFacesDetected(
                         faces,
                         mediaImage.width,
