@@ -1,5 +1,14 @@
 # Face filter android app
 
+## Current status
+- Able to draw face bounding box based using jetpack compose
+- Now we draw the face box only if the user smiles
+
+## To-DO
+- [x] Draw bounding box using compose
+- [x] Use face smiling probability
+- [ ] Add sunglasses if the user smiles
+
 ## Challenges faced
 1. The width and height of the image are interchanged, this will be determined by the image rotation degrees. This was tricky to find out.
 
